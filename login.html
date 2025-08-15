@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6c8dbf 0%, #c9cf89 100%);
+        }
+        
+        .card {
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        .tabs {
+            display: flex;
+            position: relative;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .auth-tab.active {
+            color: var(--primary);
+        }
+        
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 50%;
+            background-color: var(--primary);
+            transition: all 0.3s ease;
+        }
+        
+        .auth-content {
+            display: none;
+            padding: 2rem;
+        }
+        
+        .auth-content.active {
+            display: block;
+        }
+        
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .google-btn {
+            background-color: #fff;
+            color: #5f6368;
+            border: 1px solid #dadce0;
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.5rem;
+        }
+        
+        .google-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: #64748b;
+        }
+        
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .divider::before {
+            margin-right: 1rem;
+        }
+        
+        .divider::after {
+            margin-left: 1rem;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-label {
+            position: absolute;
+            top: 0.75rem;
+            left: 1rem;
+            color: #64748b;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(86, 83, 145, 0.2);
+        }
+        
+        .form-input:focus + .input-label,
+        .form-input:not(:placeholder-shown) + .input-label {
+            transform: translateY(-1.25rem) scale(0.875);
+            background-color: rgb(239, 234, 234);
+            padding: 0 0.25rem;
+            color: var(--primary);
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+        
+        .remember-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-label {
+            font-size: 0.875rem;
+            color: var(--dark);
+        }
+        
+        .checkbox-input {
+            margin-right: 0.75rem;
+            accent-color: var(--primary);
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .auth-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #64748b;
+        }
+        
+        .forgot-password {
+            font-size: 0.875rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+        
+        .link {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+        
+        .hero-image {
+            width: 100%;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .create-account-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+        
+        @media (max-width: 768px) {
+            .auth-card {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body class="auth-container">
+    <div class="card">
+        <!-- <div class="hero-image">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f5d3a371-0ae6-4cf3-9a6a-64bcdbec7bc6.png" alt="Modern digital login interface with abstract geometric patterns in gradient colors" />
+        </div> -->
+
+        <!-- Tabs -->
+        <div class="tabs relative">
+            <div class="auth-tab active" onclick="switchTab('login')">Login</div>
+            <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
+            <div class="tab-indicator"></div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-content" class="auth-content active">
+            <h2 class="section-title">WELCOME </h2>
+            
+            <!-- Social Login -->
+            <button class="social-btn google-btn mb-4" onclick="socialLogin('google')">
+                <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                         Continue with Google
+            </button>
+            
+            <div class="divider">or</div>
+            
+            <!-- Email Login -->
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="email" id="login-email" class="form-input" placeholder=" " required>
+                    <label for="login-email" class="input-label">Email address</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="login-password" class="form-input" placeholder=" " required>
+                    <label for="login-password" class="input-label">Password</label>
+                    <span class="toggle-password" onclick="togglePassword('login-password')">Show</span>
+                </div>
+                
+                <div class="remember-row">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="remember-me" class="checkbox-input">
+                        <label for="remember-me" class="checkbox-label">Remember me</label>
+                    </div>
+                    
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="auth-btn">Log in</button>
+            </form>
+            
+            <div class="footer">
+                Don't have an account? <span class="link" onclick="switchTab('signup')">Sign up</span>
+            </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signup-content" class="auth-content">
+            <h2 class="create-account-title">Create account</h2>
+            
+            <!-- Social Signup -->
+            <button class="social-btn google-btn mb-4" onclick="socialLogin('google')">
+                <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                    <path fill="none" d="M0 0h48v48H0z"/>
+                </svg>
+                Continue with Google
+            </button>
+            
+            <div class="divider">or</div>
+            
+            <!-- Email Signup -->
+            <form id="signup-form">
+                <div class="input-group">
+                    <input type="text" id="signup-name" class="form-input" placeholder=" " required>
+                    <label for="signup-name" class="input-label">Full name</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="email" id="signup-email" class="form-input" placeholder=" " required>
+                    <label for="signup-email" class="input-label">Email address</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="signup-password" class="form-input" placeholder=" " required>
+                    <label for="signup-password" class="input-label">Password</label>
+                    <span class="toggle-password" onclick="togglePassword('signup-password')">Show</span>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="signup-confirm-password" class="form-input" placeholder=" " required>
+                    <label for="signup-confirm-password" class="input-label">Confirm password</label>
+                    <span class="toggle-password" onclick="togglePassword('signup-confirm-password')">Show</span>
+                </div>
+                
+                <div class="checkbox-container mb-6">
+                    <input type="checkbox" id="terms-agreement" class="checkbox-input" required>
+                    <label for="terms-agreement" class="text-sm text-gray-600">
+                        I agree to the <a href="#" class="text-primary-600 hover:underline">Terms of Service</a> and <a href="#" class="text-primary-600 hover:underline">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="auth-btn">Create account</button>
+            </form>
+            
+            <div class="auth-footer">
+                Already have an account? <span class="auth-link" onclick="switchTab('login')">Log in</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Update tab indicator
+            document.querySelector('.tab-indicator').style.transform = 
+                tabName === 'login' ? 'translateX(0)' : 'translateX(100%)';
+            
+            // Update active tab
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.textContent.toLowerCase().includes(tabName));
+            });
+            
+            // Update active content
+            document.querySelectorAll('.auth-content').forEach(content => {
+                content.classList.toggle('active', content.id.includes(tabName));
+            });
+        }
+        
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const toggle = input.nextElementSibling.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.textContent = 'Hide';
+            } else {
+                input.type = 'password';
+                toggle.textContent = 'Show';
+            }
+        }
+        
+        function socialLogin(provider) {
+            alert(`Implement ${provider} login functionality here`);
+            // In a real app, you would redirect to the provider's auth endpoint
+        }
+        
+        // Form submission handlers
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Here you would typically make an API call to authenticate
+            console.log('Login attempt with:', { email, password });
+            alert('Login form submitted (check console)');
+        });
+        
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm-password').value;
+            
+            // Validate password match
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            // Here you would typically make an API call to register
+            console.log('Signup attempt with:', { name, email, password });
+            alert('Signup form submitted (check console)');
+        });
+        
+        // Password strength indicator could be added here
+    </script>
+</body>
+</html>
