@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Re-Give | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="shortcut icon"
+      href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+      type="image/x-icon"
+    />
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div
+      class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 overflow-hidden"
+    >
+      <!-- Left side: Illustration -->
+      <div
+        class="hidden md:flex items-center justify-center bg-blue-50 p-8"
+      >
+        <img
+          src="https://c0.wallpaperflare.com/preview/610/331/738/balloons-charity-colorful-colourful.jpg"
+          alt="Illustration"
+          class="max-w-sm rounded-xl shadow-md"
+        />
+      </div>
+
+      <!-- Right side: Login form -->
+      <div class="p-10 flex flex-col justify-center">
+        <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">
+          Welcome Back 👋
+        </h2>
+        <p class="text-center text-gray-500 mb-6">
+          Login to continue to <span class="font-semibold">Re-Give</span>
+        </p>
+
+        <!-- Google Login -->
+        <button
+          onclick="socialLogin()"
+          class="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2.5 rounded-lg mb-4 hover:bg-red-600 transition font-medium"
+        >
+          <img
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            alt="Google"
+            class="w-5 h-5"
+          />
+          Continue with Google
+        </button>
+
+        <!-- Divider -->
+        <div class="flex items-center mb-4">
+          <div class="flex-grow h-px bg-gray-300"></div>
+          <span class="px-3 text-gray-500 text-sm">or</span>
+          <div class="flex-grow h-px bg-gray-300"></div>
+        </div>
+
+        <!-- Email/Password Login Form -->
+        <form id="login-form" class="space-y-4">
+          <input
+            type="email"
+            id="login-email"
+            placeholder="Email"
+            class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            required
+          />
+          <input
+            type="password"
+            id="login-password"
+            placeholder="Password"
+            class="w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            required
+          />
+
+          <!-- Forgot Password link -->
+          <div class="text-right">
+            <a
+              href="#"
+              onclick="resetPassword()"
+              class="text-sm text-blue-600 hover:underline"
+              >Forgot password?</a
+            >
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition font-medium"
+          >
+            Login
+          </button>
+        </form>
+
+        <!-- Signup link -->
+        <p class="text-sm text-center mt-6 text-gray-600">
+          Don’t have an account?
+          <a href="/signup" class="text-blue-600 font-medium hover:underline"
+            >Sign up</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <!-- ✅ Firebase Scripts -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithEmailAndPassword,
+        signInWithPopup,
+        GoogleAuthProvider,
+        sendPasswordResetEmail,
+      } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+      // ✅ Firebase config from Express (.env variables)
+      const firebaseConfig = {
+        apiKey: "<%= firebaseConfig.apiKey %>",
+        authDomain: "<%= firebaseConfig.authDomain %>",
+        projectId: "<%= firebaseConfig.projectId %>",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const googleProvider = new GoogleAuthProvider();
+
+      // Google login
+      window.socialLogin = async function () {
+        try {
+          const result = await signInWithPopup(auth, googleProvider);
+          const token = await result.user.getIdToken();
+          await fetch("/set-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          });
+          window.location.href = "/dashboard";
+        } catch (err) {
+          alert("Google login failed: " + err.message);
+          console.error(err);
+        }
+      };
+
+      // Email/password login
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("login-email").value;
+          const password = document.getElementById("login-password").value;
+          try {
+            const userCredential = await signInWithEmailAndPassword(
+              auth,
+              email,
+              password
+            );
+            const token = await userCredential.user.getIdToken();
+            await fetch("/set-token", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token }),
+            });
+            window.location.href = "/dashboard";
+          } catch (err) {
+            alert("Login failed: " + err.message);
+            console.error(err);
+          }
+        });
+
+      // Forgot password
+      window.resetPassword = async function () {
+        const email = document.getElementById("login-email").value;
+        if (!email) {
+          alert("⚠️ Please enter your email first.");
+          return;
+        }
+        try {
+          await sendPasswordResetEmail(auth, email);
+          alert(
+            "📩 Password reset email sent! Please check your inbox (and spam)."
+          );
+        } catch (err) {
+          alert("❌ Failed to send reset email: " + err.message);
+          console.error(err);
+        }
+      };
+    </script>
+  </body>
+</html>

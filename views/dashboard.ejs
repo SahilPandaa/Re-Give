@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Re-Give</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="shortcut icon" href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png" type="image/x-icon">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- ✅ Popup Container -->
+<div id="popup" style="
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+  font-size: 16px;
+  font-weight: bold;
+  transition: opacity 0.3s ease;
+  z-index: 9999;">
+</div>
+
+
+  <!-- Navbar -->
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-green-700">Re-Give Dashboard</h1>
+    <nav class="flex gap-4">
+      <a href="/" class="text-gray-600 hover:text-green-600">Home</a>
+      <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+        Logout
+      </a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow p-6 max-w-4xl mx-auto">
+    <div class="bg-white shadow rounded-2xl p-6">
+      <h2 class="text-xl font-bold mb-4">Welcome, <%= user?.email %> 👋</h2>
+
+      <p class="text-gray-600 mb-6">
+        You are successfully logged in with Firebase Authentication.
+        From here, you can manage your donations, requests, and profile.
+      </p>
+
+      <!-- Example Cards / Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <a href="/" class="block p-6 bg-green-100 rounded-2xl hover:bg-green-200 transition">
+          <h3 class="text-lg font-semibold text-green-700">Donate an Item</h3>
+          <p class="text-gray-600 text-sm mt-2">
+            List an item you want to donate so that NSS volunteers can pick it up.
+          </p>
+        </a>
+
+       
+        <!-- <a href="/requests" class="block p-6 bg-blue-100 rounded-2xl hover:bg-blue-200 transition">
+          <h3 class="text-lg font-semibold text-blue-700">View Requests</h3>
+          <p class="text-gray-600 text-sm mt-2">
+            Check requests from students/NGOs who need donations.
+          </p>
+        </a>
+        
+        <a href="/my-donations" class="block p-6 bg-purple-100 rounded-2xl hover:bg-purple-200 transition">
+          <h3 class="text-lg font-semibold text-purple-700">My Donations</h3>
+          <p class="text-gray-600 text-sm mt-2">
+            View and manage the items you have donated.
+        </p>
+        </a>
+
+         <a href="/profile" class="block p-6 bg-yellow-100 rounded-2xl hover:bg-yellow-200 transition" onclick="goToProfile">
+          <h3 class="text-lg font-semibold text-yellow-700" >My Profile</h3>
+          <p class="text-gray-600 text-sm mt-2">
+          View and edit your profile information.
+          </p>
+        </a> -->
+
+
+        <a href="/logout" class="block p-6 bg-red-100 rounded-2xl hover:bg-red-200 transition">
+          <h3 class="text-lg font-semibold text-red-700">Logout</h3>
+          <p class="text-gray-600 text-sm mt-2">
+            End your current session and go back to home.
+          </p>
+        </a>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+  // ✅ Detect query param from redirect
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get("success");
+
+  if (success) {
+    const popup = document.getElementById("popup");
+
+    if (success === "true") {
+      popup.textContent = "✅ Donation submitted successfully!";
+      popup.style.background = "#4caf50"; // green
+    } else {
+      popup.textContent = "❌ Failed to submit donation. Try again!";
+      popup.style.background = "#f44336"; // red
+    }
+
+    popup.style.display = "block";
+    popup.style.opacity = "1";
+
+    // Hide after 3 seconds
+    setTimeout(() => {
+      popup.style.opacity = "0";
+      setTimeout(() => popup.style.display = "none", 300);
+    }, 3000);
+  }
+
+</script>
+
+
+</body>
+</html>
