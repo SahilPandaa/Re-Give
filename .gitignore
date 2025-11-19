@@ -1,3 +1,19 @@
-node_modules
-serviceAccountKey.json
+# Environment files
 .env
+.env.* 
+serviceAccountKey.json
+
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+
+# Build
+dist/
+build/
+
+# OS Files
+.DS_Store
+Thumbs.db
