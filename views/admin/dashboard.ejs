@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Re-Give</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 flex flex-col">
+
+  <!-- ✅ Popup Notification -->
+  <div id="popup" style="
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #22c55e;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 9999;
+    transition: opacity 0.3s ease;">
+  </div>
+
+  <!-- Navbar -->
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">Re-Give Admin Panel</h1>
+    <nav class="flex gap-4 items-center">
+      <span class="text-gray-300">Welcome, <%= admin?.name || 'Admin' %> 👋</span>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+        Logout
+      </a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="bg-gray-900/70 backdrop-blur-lg border border-gray-700 rounded-2xl shadow-2xl w-full max-w-6xl p-8 transition hover:border-green-400">
+      <h2 class="text-2xl font-bold text-green-400 mb-3">
+        Admin Dashboard
+      </h2>
+
+      <p class="text-gray-400 mb-8 leading-relaxed">
+        Manage all aspects of Re-Give — donations, volunteers, and users from this control panel.
+      </p>
+
+      <!-- Statistics Section -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div class="bg-gray-800/70 border border-gray-700 rounded-2xl p-6 text-center hover:border-green-400 transition">
+          <h3 class="text-lg font-semibold text-green-300">Total Donations</h3>
+          <p class="text-3xl font-bold text-green-400 mt-2"><%= totalDonations %></p>
+        </div>
+
+        <div class="bg-gray-800/70 border border-gray-700 rounded-2xl p-6 text-center hover:border-blue-400 transition">
+          <h3 class="text-lg font-semibold text-blue-300">Join Requests</h3>
+          <p class="text-3xl font-bold text-blue-400 mt-2"><%= totalVolunteers %></p>
+        </div>
+
+        <div class="bg-gray-800/70 border border-gray-700 rounded-2xl p-6 text-center hover:border-yellow-400 transition">
+          <h3 class="text-lg font-semibold text-yellow-300">Total Users</h3>
+          <p class="text-3xl font-bold text-yellow-400 mt-2"><%= totalUsers %></p>
+        </div>
+      </div>
+
+      <!-- Admin Actions -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <a href="/admin/donations" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-green-400 hover:shadow-green-400/20 transition">
+          <h3 class="text-lg font-semibold text-green-300 group-hover:text-green-400 transition">View Donations</h3>
+          <p class="text-gray-400 text-sm mt-2">
+            Review all donations and update their statuses.
+          </p>
+        </a>
+
+        <a href="/admin/join-team" 
+            class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-blue-400 hover:shadow-blue-400/20 transition">
+            <h3 class="text-lg font-semibold text-blue-300 group-hover:text-blue-400 transition">
+                View Join Requests
+            </h3>
+            <p class="text-gray-400 text-sm mt-2">
+                Approve or reject volunteer team requests.
+            </p>
+        </a>
+
+        <a href="/admin/users" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-yellow-400 hover:shadow-yellow-400/20 transition">
+          <h3 class="text-lg font-semibold text-yellow-300 group-hover:text-yellow-400 transition">Manage Users</h3>
+          <p class="text-gray-400 text-sm mt-2">
+            View or edit registered users’ details.
+          </p>
+        </a>
+
+        <!-- ✅ New: See Admins and Roles -->
+        <a href="/admin/admins" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-purple-400 hover:shadow-purple-400/20 transition">
+          <h3 class="text-lg font-semibold text-purple-300 group-hover:text-purple-400 transition">
+            See Admins & Roles
+          </h3>
+          <p class="text-gray-400 text-sm mt-2">
+            View all admins and their assigned privileges.
+          </p>
+        </a>
+
+        <!-- ✅ New: Collected Items -->
+        <a href="/admin/collected-items" 
+          class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 
+                  hover:border-orange-400 hover:shadow-orange-400/20 transition">
+          <h3 class="text-lg font-semibold text-orange-300 group-hover:text-orange-400 transition">
+            Collected Items
+          </h3>
+          <p class="text-gray-400 text-sm mt-2">
+            View all collected donation items and their details.
+          </p>
+        </a>
+
+        <a href="/admin/Beneficiary" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-green-400 hover:shadow-green-400/20 transition">
+          <h3 class="text-lg font-semibold text-green-300 group-hover:text-green-400">Beneficiary Details</h3>
+          <p class="text-gray-400 mt-2">View all beneficiaries and their received donations.</p>
+        </a>
+
+        <a href="/admin/add-event" 
+            class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 
+                    hover:border-pink-400 hover:shadow-pink-400/20 transition">
+          <h3 class="text-lg font-semibold text-pink-300 group-hover:text-pink-400 transition">Add Event</h3>
+          <p class="text-gray-400 text-sm mt-2">Create a new upcoming event for your community.</p>
+        </a>
+
+        <!-- ✅ New: Ongoing Events -->
+        <a href="/admin/ongoing-events" 
+            class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 
+                    hover:border-cyan-400 hover:shadow-cyan-400/20 transition">
+          <h3 class="text-lg font-semibold text-cyan-300 group-hover:text-cyan-400 transition">Ongoing Events</h3>
+          <p class="text-gray-400 text-sm mt-2">View all currently active and live events.</p>
+        </a>
+        
+      </div>
+    </div>
+  </main>
+
+  <!-- ✅ Popup Script -->
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const msg = params.get("msg");
+    const popup = document.getElementById("popup");
+
+    if (msg) {
+      popup.textContent = msg;
+      popup.style.display = "block";
+      popup.style.opacity = "1";
+      setTimeout(() => {
+        popup.style.opacity = "0";
+        setTimeout(() => (popup.style.display = "none"), 300);
+      }, 3000);
+    }
+  </script>
+
+</body>
+</html>

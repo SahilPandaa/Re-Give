@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Event | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 flex flex-col">
+
+  <!-- ✅ Navbar -->
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">Re-Give Admin Panel</h1>
+    <nav class="flex gap-4 items-center">
+      <a href="/admin/dashboard" class="text-gray-300 hover:text-green-400">Dashboard</a>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</a>
+    </nav>
+  </header>
+
+  <!-- ✅ Main Content -->
+  <main class="flex-grow flex justify-center items-start py-12 px-4">
+    <div class="max-w-lg w-full p-8 bg-gray-900/80 rounded-2xl shadow-2xl border border-gray-700">
+      <h1 class="text-3xl font-bold mb-6 text-center text-emerald-400">Add New Event</h1>
+
+      <!-- ✅ Event Form -->
+      <form id="addEventForm" action="/admin/add-event" method="POST" enctype="multipart/form-data" class="space-y-5">
+
+        <!-- Event Title -->
+        <div>
+          <label class="block text-gray-400 mb-1">Event Title</label>
+          <input
+            type="text"
+            name="title"
+            id="title"
+            placeholder="Event Title"
+            required
+            class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <!-- Event Date -->
+        <div>
+          <label class="block text-gray-400 mb-1">Event Date</label>
+          <input
+            type="text"
+            name="date"
+            id="date"
+            placeholder="e.g., 15 November 2025"
+            required
+            class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <!-- Event Image -->
+        <div>
+          <label class="block text-gray-400 mb-1">Upload Event Image</label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            required
+            class="w-full text-gray-300 p-2 bg-gray-800 border border-gray-700 rounded-md file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-emerald-500 file:text-black hover:file:bg-emerald-600 cursor-pointer"
+          />
+        </div>
+
+        <!-- Event Description -->
+        <div>
+          <label class="block text-gray-400 mb-1">Description</label>
+          <textarea
+            name="description"
+            id="description"
+            placeholder="Write event details..."
+            required
+            rows="4"
+            class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-emerald-500"
+          ></textarea>
+        </div>
+
+        <!-- Button Text -->
+        <div>
+          <label class="block text-gray-400 mb-1">Button Text (optional)</label>
+          <input
+            type="text"
+            name="buttonText"
+            id="buttonText"
+            placeholder="e.g., Register Now"
+            class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="bg-emerald-500 hover:bg-emerald-600 w-full py-3 rounded-lg font-semibold text-black transition"
+        >
+          ➕ Add Event
+        </button>
+      </form>
+
+      <!-- ✅ Success / Error Message -->
+      <%
+        const successStatus = typeof success !== "undefined" ? success : null;
+      %>
+
+      <% if (successStatus === "true") { %>
+        <p class="text-green-400 mt-5 text-center font-medium">
+          ✅ Event added successfully!
+        </p>
+      <% } else if (successStatus === "false") { %>
+        <p class="text-red-400 mt-5 text-center font-medium">
+          ❌ Failed to add event. Please try again.
+        </p>
+      <% } %>
+    </div>
+  </main>
+
+  <!-- ✅ Form Validation Script -->
+  <script>
+    document.getElementById("addEventForm").addEventListener("submit", function(e) {
+      const title = document.getElementById("title").value.trim();
+      const date = document.getElementById("date").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const image = document.getElementById("image").files[0];
+
+      if (!title || !date || !description || !image) {
+        e.preventDefault();
+        alert("⚠️ Please fill all required fields and upload an image.");
+        return;
+      }
+
+      // Optional date validation
+      const datePattern = /\d{1,2}\s+\w+\s+\d{4}/; // e.g., 15 November 2025
+      if (!datePattern.test(date)) {
+        e.preventDefault();
+        alert("📅 Please enter the date in the correct format (e.g., 15 November 2025).");
+      }
+    });
+
+    // Hide messages after 4 seconds
+    setTimeout(() => {
+      const msg = document.querySelector("p.text-green-400, p.text-red-400");
+      if (msg) msg.remove();
+    }, 4000);
+  </script>
+</body>
+</html>

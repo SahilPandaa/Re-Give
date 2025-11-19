@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beneficiary List | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">Beneficiary Details</h1>
+    <nav class="flex gap-4 items-center">
+      <a href="/admin/dashboard" class="text-gray-300 hover:text-green-400 transition">Dashboard</a>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</a>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-grow p-8 flex justify-center">
+    <div class="bg-gray-900/70 backdrop-blur-lg border border-gray-700 rounded-2xl shadow-2xl w-full max-w-7xl p-8">
+      <h2 class="text-2xl font-bold text-green-400 mb-6">List of Beneficiaries</h2>
+
+      <% if (beneficiaries && beneficiaries.length > 0) { %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-700 rounded-xl overflow-hidden">
+            <thead class="bg-gray-800/80">
+              <tr>
+                <th class="py-3 px-4 text-left text-green-300">SL No.</th>
+                <th class="py-3 px-4 text-left text-green-300">Beneficiary Name</th>
+                <th class="py-3 px-4 text-left text-green-300">Contact</th>
+                <th class="py-3 px-4 text-left text-green-300">Address</th>
+                <th class="py-3 px-4 text-left text-green-300">Items Donated</th>
+                <th class="py-3 px-4 text-left text-green-300">Donor Name</th>
+                <th class="py-3 px-4 text-left text-green-300">Donor Email</th>
+                <th class="py-3 px-4 text-left text-green-300">Images</th>
+                <th class="py-3 px-4 text-left text-green-300">Date Donated</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-700">
+              <% beneficiaries.forEach((b, index) => { %>
+                <tr class="hover:bg-gray-800/60 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-300"><%= index + 1 %></td>
+                  <td class="py-3 px-4"><%= b.name %></td>
+                  <td class="py-3 px-4"><%= b.contact || '-' %></td>
+                  <td class="py-3 px-4 text-gray-300"><%= b.address %></td>
+                  <td class="py-3 px-4">
+                    <ul class="list-disc list-inside text-gray-300">
+                      <% b.items.forEach(i => { %><li><%= i %></li><% }) %>
+                    </ul>
+                    <% if (b.other_items) { %>
+                      <p class="text-gray-400 mt-1 italic"><%= b.other_items %></p>
+                    <% } %>
+                  </td>
+                  <td class="py-3 px-4"><%= b.donor_name %></td>
+                  <td class="py-3 px-4"><%= b.donor_email %></td>
+                  <td class="py-3 px-4">
+                    <% if (b.images && b.images.length > 0) { %>
+                      <div class="flex flex-wrap gap-2">
+                        <% b.images.forEach(img => { %>
+                          <a href="<%= img %>" target="_blank">
+                            <img src="<%= img %>" alt="Item Image"
+                              class="w-16 h-16 object-cover rounded-lg border border-gray-700 hover:scale-105 transition" />
+                          </a>
+                        <% }) %>
+                      </div>
+                    <% } else { %>
+                      <span class="text-gray-500">No images</span>
+                    <% } %>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">
+                    <%= new Date(b.donatedAt).toLocaleDateString() %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-gray-400 text-center mt-10">No beneficiaries found.</p>
+      <% } %>
+    </div>
+  </main>
+
+</body>
+</html>

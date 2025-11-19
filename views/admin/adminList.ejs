@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admins | Re-Give</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">Re-Give Admin Panel</h1>
+    <nav class="flex gap-4 items-center">
+      <a href="/admin/dashboard" class="text-gray-300 hover:text-green-400">Dashboard</a>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow p-8 flex justify-center">
+    <div class="bg-gray-900/70 border border-gray-700 rounded-2xl shadow-2xl w-full max-w-5xl p-8">
+      <h2 class="text-2xl font-bold text-green-400 mb-6">Admin Management</h2>
+
+      <p class="text-gray-400 mb-6">View all admins and their roles in the system.</p>
+
+      <!-- Admin List Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border border-gray-700 rounded-lg overflow-hidden">
+          <thead class="bg-gray-800 text-gray-300 uppercase text-xs">
+            <tr>
+              <th class="px-6 py-3 text-left">Name</th>
+              <th class="px-6 py-3 text-left">Email</th>
+              <th class="px-6 py-3 text-left">Role</th>
+              <th class="px-6 py-3 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (admins && admins.length > 0) { %>
+              <% admins.forEach(admin => { %>
+                <tr class="border-b border-gray-700 hover:bg-gray-800/50 transition">
+                  <td class="px-6 py-4"><%= admin.name || "N/A" %></td>
+                  <td class="px-6 py-4"><%= admin.email %></td>
+                  <td class="px-6 py-4 text-green-400 font-semibold">
+                    <%= admin.role || "Admin" %>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span class="bg-green-700/40 text-green-300 px-3 py-1 rounded-full text-xs font-medium">
+                      Active
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="4" class="text-center py-6 text-gray-500">No admins found</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-8">
+        <a href="/admin/dashboard" 
+           class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded-lg transition">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

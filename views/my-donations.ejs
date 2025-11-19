@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Donations | Re-Give</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">My Donations</h1>
+    <nav class="flex gap-4">
+      <a href="/dashboard" class="text-gray-300 hover:text-green-400 transition">Dashboard</a>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</a>
+    </nav>
+  </header>
+
+  <main class="flex-grow p-8">
+    <% if (donations.length === 0) { %>
+      <p class="text-center text-gray-400 text-lg mt-10">
+        You haven’t donated anything yet. 💚
+      </p>
+    <% } else { %>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% donations.forEach(donation => { %>
+          <div class="bg-gray-800/70 border border-gray-700 rounded-2xl shadow-lg overflow-hidden hover:border-green-400 transition">
+            
+            <!-- Display first image -->
+            <% if (donation.images && donation.images.length > 0) { %>
+              <img src="<%= donation.images[0] %>" alt="Donation Image" class="w-full h-56 object-cover">
+            <% } else { %>
+              <div class="w-full h-56 bg-gray-700 flex items-center justify-center text-gray-400">No Image</div>
+            <% } %>
+
+            <div class="p-5">
+              <h2 class="text-green-400 text-lg font-bold mb-2"><%= donation.items.join(", ") %></h2>
+
+              <% if (donation.other_items) { %>
+                <p class="text-sm text-gray-400 mb-1">Other: <%= donation.other_items %></p>
+              <% } %>
+
+              <p class="text-sm text-gray-400 mb-1">Pickup: <%= donation.pickup %></p>
+
+              <% if (donation.other_location) { %>
+                <p class="text-sm text-gray-400 mb-1">Location: <%= donation.other_location %></p>
+              <% } %> 
+              
+              
+              <p class="text-xs text-gray-500 mt-2">
+                📅 Donated on <%= donation.createdAt.toLocaleDateString() %>
+              </p>
+
+              <!-- ✅ Static Pickup Date Message -->
+              <p class="text-sm text-yellow-400 mb-1 font-semibold">
+                Pickup Date: We will inform you soon
+              </p>
+
+            
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+
+</body>
+</html>

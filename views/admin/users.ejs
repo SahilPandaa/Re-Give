@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | Users</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">User Management</h1>
+    <nav class="flex gap-4 items-center">
+      <a href="/admin/dashboard" class="text-gray-300 hover:text-green-400 transition">Dashboard</a>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+        Logout
+      </a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow p-8">
+    <div class="max-w-7xl mx-auto bg-gray-900/70 backdrop-blur-lg border border-gray-700 rounded-2xl shadow-2xl p-8">
+      <h2 class="text-2xl font-bold text-green-400 mb-6">Registered Users</h2>
+
+      <% if (users.length === 0) { %>
+        <p class="text-gray-400 text-center py-10">No users registered yet.</p>
+      <% } else { %>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-700 rounded-lg">
+          <thead class="bg-gray-800 text-gray-300 uppercase text-sm">
+            <tr>
+              <th class="py-3 px-4 text-left border-b border-gray-700">#</th>
+              <th class="py-3 px-4 text-left border-b border-gray-700">Name</th>
+              <th class="py-3 px-4 text-left border-b border-gray-700">Email</th>
+              <th class="py-3 px-4 text-left border-b border-gray-700">Phone</th>
+              <!-- <th class="py-3 px-4 text-left border-b border-gray-700">Role</th> -->
+              <!-- <th class="py-3 px-4 text-left border-b border-gray-700">Joined</th> -->
+              <th class="py-3 px-4 text-center border-b border-gray-700">Actions</th>
+            </tr>
+          </thead>
+
+
+         <tbody class="text-gray-300">
+            <% users.forEach((user, index) => { %>
+              <tr class="hover:bg-gray-800/50 transition">
+                <td class="py-3 px-4 border-b border-gray-700"><%= index + 1 %></td>
+                <td class="py-3 px-4 border-b border-gray-700 font-semibold text-gray-100"><%= user.name %></td>
+                <td class="py-3 px-4 border-b border-gray-700"><%= user.email %></td>
+                <td class="py-3 px-4 border-b border-gray-700"><%= user.phone %></td>
+                <td class="py-3 px-4 border-b border-gray-700">
+                  <% if (user.isAdmin) { %>
+                    <span class="text-green-400 font-semibold">Admin</span>
+                  <% } else { %>
+                    <span class="text-gray-400">User</span>
+                  <% } %>
+                </td>
+                <td class="py-3 px-4 border-b border-gray-700"><%= user.createdAt %></td>
+                <td class="py-3 px-4 border-b border-gray-700 text-center">
+                  <div class="flex justify-center gap-2">
+                    <% if (!user.isAdmin) { %>
+                      <form action="/admin/users/<%= user.uid %>/promote" method="POST">
+                        <button class="bg-green-500 text-black px-3 py-1 rounded-md hover:bg-green-600 transition text-sm">
+                          Promote
+                        </button>
+                      </form>
+                    <% } %>
+
+                    <form action="/admin/users/<%= user.uid %>?_method=DELETE" method="POST">
+                      <button class="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 transition text-sm">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+
+        </table>
+      </div>
+
+      <% } %>
+    </div>
+  </main>
+</body>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const msg = params.get("msg");
+  if (msg) alert(msg);
+</script>
+
+</html>

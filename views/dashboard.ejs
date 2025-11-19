@@ -1,90 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard | Re-Give</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="shortcut icon" href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png" type="image/x-icon">
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
 
-  <!-- ✅ Popup Container -->
-<div id="popup" style="
-  display: none;
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #4caf50;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
-  font-size: 16px;
-  font-weight: bold;
-  transition: opacity 0.3s ease;
-  z-index: 9999;">
-</div>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen text-gray-100 flex flex-col">
 
+  <!-- ✅ Popup Notification -->
+  <div id="popup" style="
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #22c55e;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 9999;
+    transition: opacity 0.3s ease;">
+  </div>
 
   <!-- Navbar -->
-  <header class="bg-white shadow p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-green-700">Re-Give Dashboard</h1>
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">Re-Give Dashboard</h1>
     <nav class="flex gap-4">
-      <a href="/" class="text-gray-600 hover:text-green-600">Home</a>
-      <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+      <a href="/" class="text-gray-300 hover:text-green-400 transition">Home</a>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
         Logout
       </a>
     </nav>
   </header>
 
   <!-- Main Content -->
-  <main class="flex-grow p-6 max-w-4xl mx-auto">
-    <div class="bg-white shadow rounded-2xl p-6">
-      <h2 class="text-xl font-bold mb-4">Welcome, <%= user?.email %> 👋</h2>
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="bg-gray-900/70 backdrop-blur-lg border border-gray-700 rounded-2xl shadow-2xl w-full max-w-5xl p-8 transition hover:border-green-400">
+      <h2 class="text-2xl font-bold text-green-400 mb-3">
+        Welcome, <%= user?.email %> 👋
+      </h2>
 
-      <p class="text-gray-600 mb-6">
-        You are successfully logged in with Firebase Authentication.
+      <p class="text-gray-400 mb-8 leading-relaxed">
+        You are successfully logged in with Firebase Authentication.  
         From here, you can manage your donations, requests, and profile.
       </p>
 
-      <!-- Example Cards / Actions -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Dashboard Actions -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        <a href="/" class="block p-6 bg-green-100 rounded-2xl hover:bg-green-200 transition">
-          <h3 class="text-lg font-semibold text-green-700">Donate an Item</h3>
-          <p class="text-gray-600 text-sm mt-2">
+        <a href="/" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-green-400 hover:shadow-green-400/20 transition">
+          <h3 class="text-lg font-semibold text-green-300 group-hover:text-green-400 transition">Donate an Item</h3>
+          <p class="text-gray-400 text-sm mt-2">
             List an item you want to donate so that NSS volunteers can pick it up.
           </p>
         </a>
 
-       
-        <!-- <a href="/requests" class="block p-6 bg-blue-100 rounded-2xl hover:bg-blue-200 transition">
-          <h3 class="text-lg font-semibold text-blue-700">View Requests</h3>
-          <p class="text-gray-600 text-sm mt-2">
-            Check requests from students/NGOs who need donations.
-          </p>
-        </a>
-        
-        <a href="/my-donations" class="block p-6 bg-purple-100 rounded-2xl hover:bg-purple-200 transition">
-          <h3 class="text-lg font-semibold text-purple-700">My Donations</h3>
-          <p class="text-gray-600 text-sm mt-2">
-            View and manage the items you have donated.
-        </p>
-        </a>
-
-         <a href="/profile" class="block p-6 bg-yellow-100 rounded-2xl hover:bg-yellow-200 transition" onclick="goToProfile">
-          <h3 class="text-lg font-semibold text-yellow-700" >My Profile</h3>
-          <p class="text-gray-600 text-sm mt-2">
-          View and edit your profile information.
+        <!-- <a href="/requests" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-blue-400 hover:shadow-blue-400/20 transition">
+          <h3 class="text-lg font-semibold text-blue-300 group-hover:text-blue-400 transition">View Requests</h3>
+          <p class="text-gray-400 text-sm mt-2">
+            Check requests from NGOs or students who need donations.
           </p>
         </a> -->
 
+        <a href="/my-donations" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-purple-400 hover:shadow-purple-400/20 transition">
+          <h3 class="text-lg font-semibold text-purple-300 group-hover:text-purple-400 transition">My Donations</h3>
+          <p class="text-gray-400 text-sm mt-2">
+            View and manage all the items you’ve donated so far.
+          </p>
+        </a>
 
-        <a href="/logout" class="block p-6 bg-red-100 rounded-2xl hover:bg-red-200 transition">
-          <h3 class="text-lg font-semibold text-red-700">Logout</h3>
-          <p class="text-gray-600 text-sm mt-2">
-            End your current session and go back to home.
+        <a href="/profile" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-yellow-400 hover:shadow-yellow-400/20 transition">
+          <h3 class="text-lg font-semibold text-yellow-300 group-hover:text-yellow-400 transition">My Profile</h3>
+          <p class="text-gray-400 text-sm mt-2">
+            View or update your profile and contact details.
+          </p>
+        </a>
+
+        <a href="/logout" class="group block bg-gray-800/70 border border-gray-700 rounded-2xl p-6 hover:border-red-400 hover:shadow-red-400/20 transition">
+          <h3 class="text-lg font-semibold text-red-300 group-hover:text-red-400 transition">Logout</h3>
+          <p class="text-gray-400 text-sm mt-2">
+            End your session and return to the homepage.
           </p>
         </a>
 
@@ -92,34 +96,27 @@
     </div>
   </main>
 
+  <!-- ✅ Popup Script -->
   <script>
-  // ✅ Detect query param from redirect
-  const params = new URLSearchParams(window.location.search);
-  const success = params.get("success");
-
-  if (success) {
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
     const popup = document.getElementById("popup");
 
-    if (success === "true") {
-      popup.textContent = "✅ Donation submitted successfully!";
-      popup.style.background = "#4caf50"; // green
-    } else {
-      popup.textContent = "❌ Failed to submit donation. Try again!";
-      popup.style.background = "#f44336"; // red
+    if (success) {
+      popup.textContent = success === "true"
+        ? "✅ Donation submitted successfully!"
+        : "❌ Failed to submit donation. Try again!";
+
+      popup.style.background = success === "true" ? "#22c55e" : "#ef4444";
+      popup.style.display = "block";
+      popup.style.opacity = "1";
+
+      setTimeout(() => {
+        popup.style.opacity = "0";
+        setTimeout(() => (popup.style.display = "none"), 300);
+      }, 3000);
     }
-
-    popup.style.display = "block";
-    popup.style.opacity = "1";
-
-    // Hide after 3 seconds
-    setTimeout(() => {
-      popup.style.opacity = "0";
-      setTimeout(() => popup.style.display = "none", 300);
-    }, 3000);
-  }
-
-</script>
-
+  </script>
 
 </body>
 </html>

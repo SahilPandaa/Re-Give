@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collected Items | Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="shortcut icon"
+    href="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e7d49ef-31f4-4759-82b9-b486dc7aa23f.png"
+    type="image/x-icon"
+  />
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="bg-gray-800/60 backdrop-blur-md border-b border-gray-700 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-2xl font-bold text-green-400 tracking-wide">Collected Items</h1>
+    <nav class="flex gap-4 items-center">
+      <a href="/admin/dashboard" class="text-gray-300 hover:text-green-400 transition">Dashboard</a>
+      <a href="/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</a>
+    </nav>
+  </header>
+
+  <!-- ✅ Popup Message -->
+  <div id="popup" class="hidden fixed top-6 right-6 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg font-medium z-50"></div>
+
+  <!-- ✅ Beneficiary Modal -->
+  <div id="beneficiaryModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 w-full max-w-md relative">
+      <h3 class="text-xl font-semibold text-green-400 mb-4">Add Beneficiary Details</h3>
+
+      <form id="beneficiaryForm">
+        <input type="hidden" name="donatedItemId" id="donatedItemId" />
+
+        <div class="mb-4">
+          <label class="block text-gray-300 mb-2">Name</label>
+          <input type="text" name="name" required class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-green-400 outline-none">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-gray-300 mb-2">Contact (optional)</label>
+          <input type="text" name="contact" class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-green-400 outline-none">
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-gray-300 mb-2">Address <span class="text-red-500">*</span></label>
+          <textarea name="address" required rows="2" class="w-full px-3 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-green-400 outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" id="closeModal" class="px-4 py-2 bg-gray-600 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700 transition">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-grow p-8 flex justify-center">
+    <div class="bg-gray-900/70 backdrop-blur-lg border border-gray-700 rounded-2xl shadow-2xl w-full max-w-7xl p-8">
+      <h2 class="text-2xl font-bold text-green-400 mb-6">Collected Donation Items</h2>
+
+      <% if (donatedItems && donatedItems.length > 0) { %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-700 rounded-xl overflow-hidden">
+            <thead class="bg-gray-800/80">
+              <tr>
+                <th class="py-3 px-4 text-left text-green-300">SL No.</th>
+                <th class="py-3 px-4 text-left text-green-300">Donor Name</th>
+                <th class="py-3 px-4 text-left text-green-300">Email</th>
+                <th class="py-3 px-4 text-left text-green-300">Contact</th>
+                <th class="py-3 px-4 text-left text-green-300">Pickup Address</th>
+                <th class="py-3 px-4 text-left text-green-300">Items</th>
+                <th class="py-3 px-4 text-left text-green-300">Other Items</th>
+                <th class="py-3 px-4 text-left text-green-300">Images</th>
+                <th class="py-3 px-4 text-left text-green-300">Collected On</th>
+                <th class="py-3 px-4 text-left text-green-300">Action</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-700">
+              <% donatedItems.forEach((item, index) => { %>
+                <tr class="hover:bg-gray-800/60 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-300"><%= index + 1 %></td>
+                  <td class="py-3 px-4"><%= item.donor_name %></td>
+                  <td class="py-3 px-4"><%= item.donor_email %></td>
+                  <td class="py-3 px-4"><%= item.donor_contact %></td>
+                  <td class="py-3 px-4"><%= item.pickup %></td>
+
+                  <td class="py-3 px-4">
+                    <ul class="list-disc list-inside text-gray-300">
+                      <% item.items.forEach(i => { %><li><%= i %></li><% }) %>
+                    </ul>
+                  </td>
+
+                  <td class="py-3 px-4 text-gray-400"><%= item.other_items || '-' %></td>
+
+                  <td class="py-3 px-4">
+                    <% if (item.images && item.images.length > 0) { %>
+                      <div class="flex flex-wrap gap-2">
+                        <% item.images.forEach(img => { %>
+                          <a href="<%= img %>" target="_blank">
+                            <img src="<%= img %>" alt="Item Image"
+                              class="w-16 h-16 object-cover rounded-lg border border-gray-700 hover:scale-105 transition" />
+                          </a>
+                        <% }) %>
+                      </div>
+                    <% } else { %>
+                      <span class="text-gray-500">No images</span>
+                    <% } %>
+                  </td>
+
+                  <td class="py-3 px-4 text-gray-400"><%= new Date(item.collectedAt).toLocaleDateString() %></td>
+
+                  <td class="py-3 px-4">
+                    <button 
+                      class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white text-sm font-semibold openModalBtn"
+                      data-id="<%= item._id %>">
+                      Mark as Donated
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-gray-400 text-center mt-10">No collected items found.</p>
+      <% } %>
+    </div>
+  </main>
+
+  <!-- ✅ Scripts -->
+<script>
+  const popup = document.getElementById("popup");
+  const modal = document.getElementById("beneficiaryModal");
+  const closeModal = document.getElementById("closeModal");
+  const form = document.getElementById("beneficiaryForm");
+  let currentId = null;
+
+  // ✅ Open modal
+  document.querySelectorAll(".openModalBtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentId = btn.dataset.id;
+      document.getElementById("donatedItemId").value = currentId;
+      modal.classList.remove("hidden");
+    });
+  });
+
+  // ✅ Close modal
+  closeModal.addEventListener("click", () => {
+    modal.classList.add("hidden");
+    form.reset();
+  });
+
+  // ✅ Form validation
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = form.name.value.trim();
+    const contact = form.contact.value.trim();
+    const address = form.address.value.trim();
+
+    // --- Validation ---
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const contactRegex = /^\d{10}$/;
+
+    if (name && !nameRegex.test(name)) {
+      alert("Name can only contain letters and spaces.");
+      return;
+    }
+
+    if (contact && !contactRegex.test(contact)) {
+      alert("Please enter a valid 10-digit contact number.");
+      return;
+    }
+
+    if (!address) {
+      alert("Address is required.");
+      return;
+    }
+
+    // --- Prepare data ---
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/admin/markAsDonated", {
+        method: "POST",
+        body: formData
+      });
+
+      if (res.ok) {
+        modal.classList.add("hidden");
+        popup.textContent = "✅ Item successfully marked as donated!";
+        popup.classList.remove("hidden");
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        const errorText = await res.text();
+        console.error("Server Error:", errorText);
+        alert("❌ Error saving beneficiary data.");
+      }
+    } catch (err) {
+      console.error("Network error:", err);
+      alert("❌ Could not connect to the server. Please try again.");
+    }
+  });
+
+  // ✅ Popup message logic
+  const params = new URLSearchParams(window.location.search);
+  const msg = params.get("msg");
+  if (msg) {
+    popup.textContent = msg;
+    popup.classList.remove("hidden");
+    setTimeout(() => popup.classList.add("hidden"), 3000);
+  }
+</script>
+
+
+</body>
+</html>
