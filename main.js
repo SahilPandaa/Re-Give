@@ -13,7 +13,6 @@ import { v2 as cloudinary } from "cloudinary";
 import methodOverride from "method-override";
 
 
-
 // -------------------- MODELS --------------------
 import { Donation } from "./models/Donation.js";
 import User from "./models/user.js";
@@ -24,29 +23,42 @@ import Event from "./models/Event.js";
 import Registration from "./models/Registration.js";
 
 
-
-
 // -------------------- BASIC SETUP --------------------
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// -------------------- FIREBASE ADMIN --------------------
+
+// -------------------- FIREBASE ADMIN (env-safe) --------------------
 try {
-  const serviceAccount = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "serviceAccountKey.json"), "utf8")
-  );
+  let serviceAccount;
+
+  // Prefer env var (for cloud hosts). It should be a JSON stringified value.
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    // Local dev fallback (keep file locally but DO NOT commit it)
+    const saPath = path.join(__dirname, "serviceAccountKey.json");
+    if (fs.existsSync(saPath)) {
+      serviceAccount = JSON.parse(fs.readFileSync(saPath, "utf8"));
+    } else {
+      throw new Error(
+        "No Firebase service account found. Set FIREBASE_SERVICE_ACCOUNT env var or place serviceAccountKey.json locally."
+      );
+    }
+  }
+
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
+
   console.log("✅ Firebase Admin initialized");
 } catch (err) {
-  console.error(
-    "❌ Firebase Admin init failed - check serviceAccountKey.json:",
-    err.message
-  );
+  console.error("❌ Firebase Admin init failed:", err.message);
+  // don't exit: we may still want the app to run (some pages can fail gracefully)
 }
+
 
 // -------------------- CLOUDINARY CONFIG --------------------
 cloudinary.config({
@@ -54,6 +66,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
 
 // -------------------- MULTER CONFIG --------------------
 const storage = new CloudinaryStorage({
@@ -67,7 +80,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter(req, file, cb) {
     if (!file.mimetype.startsWith("image/")) {
       cb(new Error("Only image files are allowed!"));
@@ -77,14 +90,18 @@ const upload = multer({
   },
 });
 
+
 // -------------------- MONGODB CONNECTION --------------------
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    // options can be added if needed
+  })
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => {
     console.error("❌ MongoDB connection failed:", err.message);
     process.exit(1);
   });
+
 
 // -------------------- MIDDLEWARE --------------------
 app.use(cookieParser());
@@ -96,6 +113,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+
 // -------------------- AUTH MIDDLEWARE --------------------
 app.use(async (req, res, next) => {
   const token = req.cookies?.token;
@@ -103,7 +121,7 @@ app.use(async (req, res, next) => {
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
-    req.user = decoded;
+    req.user = decoded; // attach decoded token to req.user
   } catch (error) {
     console.warn("Invalid/expired token:", error.message);
     res.clearCookie("token");
@@ -119,12 +137,17 @@ function requireAuth(req, res, next) {
 
 async function requireAdminAuth(req, res, next) {
   try {
-    const sessionCookie = req.cookies.token;
+    const sessionCookie = req.cookies?.token;
     if (!sessionCookie) return res.redirect("/login");
 
     const decoded = await admin.auth().verifyIdToken(sessionCookie);
-    if (!decoded.admin) return res.status(403).send("Access denied. Admins only.");
+    // custom claims applied via admin.auth().setCustomUserClaims will appear on decoded
+    const isAdmin = decoded?.admin || decoded?.customClaims?.admin || false;
 
+    if (!isAdmin) return res.status(403).send("Access denied. Admins only.");
+
+    // Keep both req.user and req.admin if needed
+    req.user = decoded;
     req.admin = decoded;
     next();
   } catch (err) {
@@ -132,6 +155,7 @@ async function requireAdminAuth(req, res, next) {
     res.redirect("/login");
   }
 }
+
 
 // -------------------- ROUTES --------------------
 
@@ -166,6 +190,7 @@ app.post("/set-token", (req, res) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
   res.json({ message: "Token saved successfully" });
 });
@@ -175,10 +200,11 @@ app.get("/logout", (req, res) => {
   res.redirect("/login");
 });
 
+
 // ---------- USER ROUTES ----------
 app.get("/", requireAuth, async (req, res) => {
-    try {
-   // Fetch all events from MongoDB (sorted latest first)
+  try {
+    // Fetch all events from MongoDB (sorted latest first)
     const events = await Event.find().sort({ _id: -1 });
 
     // Render EJS with events and user
@@ -191,7 +217,7 @@ app.get("/", requireAuth, async (req, res) => {
 
 app.get("/dashboard", requireAuth, (req, res) => {
   // If admin logs in, redirect to admin dashboard
-  if (req.user?.admin) return res.redirect("/admin/dashboard");
+  if (req.user?.admin || req.user?.customClaims?.admin) return res.redirect("/admin/dashboard");
   res.render("dashboard", { user: req.user });
 });
 
@@ -338,12 +364,11 @@ app.post("/user/register-event", async (req, res) => {
 });
 
 
-
 // ---------- ADMIN ROUTES ----------
 // Admin Dashboard
 app.get("/admin/dashboard", requireAdminAuth, async (req, res) => {
   try {
-    // ✅ Get all users from Firebase Auth
+    // ✅ Get all users from Firebase Auth (paginated)
     const listAllUsers = async (nextPageToken, users = []) => {
       const result = await admin.auth().listUsers(1000, nextPageToken);
       users.push(...result.users);
@@ -397,7 +422,8 @@ app.delete("/admin/users/:id", async (req, res) => {
 app.get("/admin/donations", requireAdminAuth, async (req, res) => {
   try {
     const donations = await Donation.find().sort({ createdAt: -1 });
-    res.render("admin/donations", { admin: req.admin, donations });
+    // Use req.user (initialized by requireAdminAuth) for admin info
+    res.render("admin/donations", { admin: req.user, donations });
   } catch (err) {
     console.error("Error fetching donations:", err);
     res.status(500).send("Server Error");
@@ -436,7 +462,7 @@ app.post("/admin/donations/:id/status", requireAdminAuth, async (req, res) => {
 });
 
 // DELETE Donation
-app.delete("/admin/donations/:id", async (req, res) => {
+app.delete("/admin/donations/:id", requireAdminAuth, async (req, res) => {
   try {
     await Donation.findByIdAndDelete(req.params.id);
     console.log("🗑️ Donation deleted:", req.params.id);
@@ -448,8 +474,6 @@ app.delete("/admin/donations/:id", async (req, res) => {
 });
 
 // -------------------- ADMIN: VIEW JOIN REQUESTS --------------------
-//join requests
-// -------------------- ADMIN: VIEW JOIN REQUESTS --------------------
 app.get("/admin/join-team", requireAdminAuth, async (req, res) => {
   try {
     const requests = await JoinTeam.find().sort({ createdAt: -1 });
@@ -460,10 +484,8 @@ app.get("/admin/join-team", requireAdminAuth, async (req, res) => {
   }
 });
 
-
 // -------------------- ADMIN: APPROVE REQUEST (PROMOTE TO ADMIN) --------------------
-// ✅ APPROVE REQUEST → Promote user to admin + remove from list
-app.post("/admin/join-team/:id/approve", async (req, res) => {
+app.post("/admin/join-team/:id/approve", requireAdminAuth, async (req, res) => {
   try {
     const joinRequest = await JoinTeam.findById(req.params.id);
     if (!joinRequest) return res.status(404).send("Join request not found");
@@ -485,9 +507,8 @@ app.post("/admin/join-team/:id/approve", async (req, res) => {
   }
 });
 
-
 // -------------------- ADMIN: REJECT REQUEST --------------------
-app.post("/admin/join-team/:id/reject", async (req, res) => {
+app.post("/admin/join-team/:id/reject", requireAdminAuth, async (req, res) => {
   try {
     await JoinTeam.findByIdAndUpdate(req.params.id, { status: "Rejected" });
     res.redirect("/admin/join-team?rejected=true");
@@ -497,9 +518,8 @@ app.post("/admin/join-team/:id/reject", async (req, res) => {
   }
 });
 
-
 // -------------------- ADMIN: DELETE REQUEST --------------------
-app.delete("/admin/join-team/:id", async (req, res) => {
+app.delete("/admin/join-team/:id", requireAdminAuth, async (req, res) => {
   try {
     await JoinTeam.findByIdAndDelete(req.params.id);
     res.redirect("/admin/join-team?deleted=true");
@@ -531,9 +551,8 @@ app.get("/admin/users", requireAdminAuth, async (req, res) => {
   }
 });
 
-
 // -------------------- ADMIN: DELETE USER --------------------
-app.delete("/admin/users/:id", async (req, res) => {
+app.delete("/admin/users/:id", requireAdminAuth, async (req, res) => {
   try {
     const userId = req.params.id;
 
@@ -562,7 +581,7 @@ app.delete("/admin/users/:id", async (req, res) => {
 });
 
 // -------------------- ADMIN: PROMOTE USER --------------------
-app.post("/admin/users/:uid/promote", async (req, res) => {
+app.post("/admin/users/:uid/promote", requireAdminAuth, async (req, res) => {
   try {
     const userId = req.params.uid;
     await admin.auth().setCustomUserClaims(userId, { admin: true });
@@ -573,8 +592,6 @@ app.post("/admin/users/:uid/promote", async (req, res) => {
     res.redirect("/admin/users?msg=Error+promoting+user");
   }
 });
-
-
 
 // -------------------- VIEW ADMINS --------------------
 app.get("/admin/admins", requireAdminAuth, async (req, res) => {
@@ -626,10 +643,9 @@ app.get("/admin/collected-items", requireAdminAuth, async (req, res) => {
 // ✅ 2. Handle “Mark as Donated” + Beneficiary Form submission (Fixed)
 const uploadNone = multer().none();
 
-app.post("/admin/markAsDonated", uploadNone,  async (req, res) => {
+app.post("/admin/markAsDonated", requireAdminAuth, uploadNone, async (req, res) => {
   try {
     console.log("📩 Received request to mark as donated");
-    // console.log("📦 Body:", req.body);
 
     const { donatedItemId, name, contact, address } = req.body;
 
@@ -664,11 +680,9 @@ app.post("/admin/markAsDonated", uploadNone,  async (req, res) => {
     });
 
     await beneficiary.save();
-    // console.log("✅ Beneficiary saved:");
 
     // ✅ Remove the original donation entry
     await Donated.findByIdAndDelete(donatedItemId);
-    // console.log("🗑️ Removed from DonatedDB:");
 
     res.status(200).json({ message: "Item marked as donated successfully." });
   } catch (err) {
@@ -679,9 +693,8 @@ app.post("/admin/markAsDonated", uploadNone,  async (req, res) => {
   }
 });
 
-
-//beneficiary list
-app.get("/admin/beneficiary", async (req, res) => {
+// beneficiary list
+app.get("/admin/beneficiary", requireAdminAuth, async (req, res) => {
   try {
     const beneficiaries = await BeneficiaryDB.find().sort({ donatedAt: -1 });
     res.render("admin/beneficiary", { beneficiaries });
@@ -690,8 +703,6 @@ app.get("/admin/beneficiary", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
 
 // ✅ Render Add Event Page
 app.get("/admin/add-event", requireAdminAuth, (req, res) => {
@@ -728,7 +739,7 @@ app.post("/admin/add-event", requireAdminAuth, upload.single("image"), async (re
 });
 
 // ✅ Admin - Ongoing Events (show all for now)
-app.get("/admin/ongoing-events", async (req, res) => {
+app.get("/admin/ongoing-events", requireAdminAuth, async (req, res) => {
   try {
     const events = await Event.find(); // <-- show all events
     res.render("admin/ongoing-events", { events });
@@ -738,9 +749,8 @@ app.get("/admin/ongoing-events", async (req, res) => {
   }
 });
 
-
 // ✅ View participants of a specific event
-app.get("/admin/event/:eventId/participants", async (req, res) => {
+app.get("/admin/event/:eventId/participants", requireAdminAuth, async (req, res) => {
   try {
     const { eventId } = req.params;
     const participants = await Registration.find({ eventId }).lean();
@@ -758,8 +768,7 @@ app.get("/admin/event/:eventId/participants", async (req, res) => {
   }
 });
 
-
-app.delete("/admin/delete-event/:eventId", async (req, res) => {
+app.delete("/admin/delete-event/:eventId", requireAdminAuth, async (req, res) => {
   try {
     const { eventId } = req.params;
     const deleted = await Event.findByIdAndDelete(eventId);
@@ -768,7 +777,7 @@ app.delete("/admin/delete-event/:eventId", async (req, res) => {
       return res.status(404).json({ success: false, message: "Event not found" });
     }
 
-    //Optionally delete associated registrations too:
+    // Optionally delete associated registrations too:
     await Registration.deleteMany({ eventId });
 
     res.json({ success: true, message: "Event deleted successfully" });
@@ -779,7 +788,9 @@ app.delete("/admin/delete-event/:eventId", async (req, res) => {
 });
 
 
-// -------------------- 404 & ERROR HANDLER --------------------
+// -------------------- HEALTH CHECK & ERROR HANDLING --------------------
+app.get("/_health", (req, res) => res.send("OK"));
+
 app.use((req, res) => res.status(404).send("Not Found"));
 
 app.use((err, req, res, next) => {
@@ -787,5 +798,6 @@ app.use((err, req, res, next) => {
   res.status(500).send("Server error");
 });
 
+
 // -------------------- START SERVER --------------------
-app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT} (PORT=${PORT})`));
