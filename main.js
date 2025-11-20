@@ -15,7 +15,7 @@ import methodOverride from "method-override";
 
 // -------------------- MODELS --------------------
 import { Donation } from "./models/Donation.js";
-import User from "./models/user.js";
+import User from "./models/User.js";
 import { JoinTeam } from "./models/joinTeam.js";
 import { Donated } from "./models/Donated.js";
 import BeneficiaryDB from "./models/Beneficiary.js";
