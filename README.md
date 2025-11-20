@@ -72,6 +72,17 @@ Re-Give/
 
 ---
 
+
+## 🌐 Live Demo
+
+Experience the live running version of the project here:
+
+🔗 **https://re-give.onrender.com**
+
+The platform is fully deployed on **Render** and can be accessed from any device.
+
+
+
 ## ⚙️ Installation (For Developers)
 
 ### 1. Clone the project:
@@ -98,11 +109,3 @@ FIREBASE_SERVICE_ACCOUNT={...}
 
 nodemon main.js
 
-
-## 🌐 Live Demo
-
-Experience the live running version of the project here:
-
-🔗 **https://re-give.onrender.com**
-
-The platform is fully deployed on **Render** and can be accessed from any device.
