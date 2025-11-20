@@ -30,33 +30,32 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-// -------------------- FIREBASE ADMIN (env-safe) --------------------
+// -------------------- FIREBASE ADMIN  --------------------
+let serviceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // Running on Render / Cloud (escaped \n)
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+  // Fix escaped newlines
+  serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+
+  console.log("🔥 Using FIREBASE_SERVICE_ACCOUNT from environment");
+} else if (fs.existsSync("serviceAccountKey.json")) {
+  // Running locally
+  serviceAccount = JSON.parse(fs.readFileSync("serviceAccountKey.json", "utf8"));
+  console.log("🔥 Using local serviceAccountKey.json");
+} else {
+  console.error("❌ No Firebase service account found!");
+}
+
 try {
-  let serviceAccount;
-
-  // Prefer env var (for cloud hosts). It should be a JSON stringified value.
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  } else {
-    // Local dev fallback (keep file locally but DO NOT commit it)
-    const saPath = path.join(__dirname, "serviceAccountKey.json");
-    if (fs.existsSync(saPath)) {
-      serviceAccount = JSON.parse(fs.readFileSync(saPath, "utf8"));
-    } else {
-      throw new Error(
-        "No Firebase service account found. Set FIREBASE_SERVICE_ACCOUNT env var or place serviceAccountKey.json locally."
-      );
-    }
-  }
-
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
-
   console.log("✅ Firebase Admin initialized");
 } catch (err) {
-  console.error("❌ Firebase Admin init failed:", err.message);
-  // don't exit: we may still want the app to run (some pages can fail gracefully)
+  console.error("❌ Firebase Admin init failed:", err);
 }
 
 
