@@ -58,14 +58,14 @@
             <li><a href="#join" class="block text-gray-200 hover:text-emerald-400 transition">Join Us</a></li>
             <li><a href="#events" class="block text-gray-200 hover:text-emerald-400 transition">Events</a></li>
             <li><a href="#donate" class="block text-gray-200 hover:text-emerald-400 transition">Donate</a></li>
-            <li><button id="logoutBtn" class="w-full text-left px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-md text-black font-medium transition">Logout</button></li>
+            <li><button id="logoutBtnMobile" class="w-full text-left px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-md text-black font-medium transition">Logout</button></li>
           <% } else { %>
             <li><a href="#home" class="block text-gray-200 hover:text-emerald-400 transition">Home</a></li>
             <li><a href="#about" class="block text-gray-200 hover:text-emerald-400 transition">About</a></li>
             <li><a href="#join" class="block text-gray-200 hover:text-emerald-400 transition">Join Us</a></li>
             <li><a href="#events" class="block text-gray-200 hover:text-emerald-400 transition">Events</a></li>
             <li><a href="#donate" class="block text-gray-200 hover:text-emerald-400 transition">Donate</a></li>
-            <li><a href="/login" id="loginBtn"  class="block px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-md text-black font-medium transition">Login / Signup</a></li>
+            <li><a href="/login" class="block px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-md text-black font-medium transition">Login / Signup</a></li>
           <% } %>
         </ul>
       </div>
@@ -531,22 +531,30 @@
   </script>
   <script src="/js/script.js"></script>
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+  // Attach logout event to BOTH buttons
+  const logoutButtons = [
+    document.getElementById("logoutBtn"),        // Desktop logout
+    document.getElementById("logoutBtnMobile")   // Mobile logout
+  ];
+
+  logoutButtons.forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
       try {
         await signOut(auth);
         await fetch("/logout", { method: "GET" });
@@ -556,7 +564,9 @@
         alert("⚠️ Logout failed. Try again.");
       }
     });
-  </script>
+  });
+</script>
+
  <script>
     // Mobile menu toggle
     const menuBtn = document.getElementById('menu-toggle');
