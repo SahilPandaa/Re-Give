@@ -89,13 +89,13 @@ The platform is fully deployed on **Render** and can be accessed from any device
 ```bash
 git clone https://github.com/SahilPandaa/Re-Give
 cd Re-Give
-
- 2. Install dependencies:
-
+```
+###2 . Install dependencies:
+```bash
 npm install
-
- 3. Create a .env file and include:
-
+```
+### 3. Create a .env file and include:
+```bash
 MONGO_URI=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
@@ -104,8 +104,8 @@ FIREBASE_API_KEY=
 FIREBASE_AUTH_DOMAIN=
 FIREBASE_PROJECT_ID=
 FIREBASE_SERVICE_ACCOUNT={...}
-
-4. Start the server:
-
+```
+### 4. Start the server:
+```bash
 nodemon main.js
-
+```
