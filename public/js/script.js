@@ -71,14 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const dashboardLink = document.querySelector('.dashboard');
-    if(dashboardLink) {
-        dashboardLink.addEventListener('click', function(e) {
-            e.preventDefault();
+    document.querySelectorAll('.dashboard').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // e.preventDefault();   <-- REMOVE THIS IF YOUR <a> ALREADY HAS href="/dashboard"
             window.location.href = '/dashboard';
-        }
-    );
-    }
+        });
+    });
+
 
     const logoutLink = document.querySelector('.logout');
     if (logoutLink) {
